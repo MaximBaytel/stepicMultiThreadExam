@@ -215,11 +215,11 @@ void HttpHandler::processingRequest(const HttpRequestHeader& header,const ByteAr
         headerResp.setPharse("Not found");
     }
 
-    ostringstream out;
+//    ostringstream out;
 
-    out << bodyResp.size();
+//    out << bodyResp.size();
 
-    headerResp.addValue("Content-length",out.str());
+//    headerResp.addValue("Content-length",out.str());
 
     //m_keepAfterResponse = header.value("connection") == "keep-alive" && headerResp.status() == 200;
 
@@ -271,11 +271,11 @@ int HttpHandler::processing()
 
     //shutdown(m_socket,SHUT_RDWR);
 
-    if (m_keepAfterResponse)
-    {
-        TRACE() << "keep-alive" << endl;
-        return +1;
-    }
+//    if (m_keepAfterResponse)
+//    {
+//        TRACE() << "keep-alive" << endl;
+//        return +1;
+//    }
 
     return 0;
 }
