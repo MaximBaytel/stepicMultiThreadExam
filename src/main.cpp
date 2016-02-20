@@ -276,7 +276,7 @@ int main(int argc, char *argv[])
 //without daemon is more convience for debugging
 #ifdef __DAEMON__
     daemonize();
-    out.open("/home/box/log.txt");
+    out.open("/tmp/log.txt");
 #endif
 
     signal(SIGINT, final_handler);
