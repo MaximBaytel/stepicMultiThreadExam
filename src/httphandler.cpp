@@ -178,7 +178,7 @@ void HttpHandler::processingRequest(const HttpRequestHeader& header,const ByteAr
     headerResp.setMajorVersion(m_majorVersion);
     headerResp.setMinorVersion(m_minorVersion);
 
-    string host = header.value("host");
+    //string host = header.value("host");
 
 
 //    if (!header.isValid())
@@ -234,7 +234,7 @@ void HttpHandler::processingRequest(const HttpRequestHeader& header,const ByteAr
 
     //полагаю что весь мой контент такой..
     headerResp.addValue("Content-Type","text/html; charset=UTF-8");
-    headerResp.addValue("host",host);
+    //headerResp.addValue("host",host);
 }
 
 int HttpHandler::processing()
