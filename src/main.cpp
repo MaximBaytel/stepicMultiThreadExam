@@ -40,6 +40,8 @@ vector<thread> threads;
 
 struct ev_loop* main_loop=NULL;
 
+std::ofstream out;
+
 
 void threadFunc(int i)
 {
@@ -274,6 +276,7 @@ int main(int argc, char *argv[])
 //without daemon is more convience for debugging
 #ifdef __DAEMON__
     daemonize();
+    out.open("/home/box/log.txt");
 #endif
 
     signal(SIGINT, final_handler);

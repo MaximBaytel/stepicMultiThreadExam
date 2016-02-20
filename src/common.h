@@ -19,8 +19,11 @@ public:
 #ifndef __DAEMON__
     #define TRACE()  cerr  <<  __LINE__  << " "  << __FILE__ << " " << __FUNCTION__ << " "
 #else
-    #define TRACE() NoOutput()
-    #define endl (1)
+extern std::ofstream out;
+    #define TRACE()  out  <<  __LINE__  << " "  << __FILE__ << " " << __FUNCTION__ << " "
+    //#define TRACE() NoOutput()
+    //#define endl (1)
+
 #endif
 
 
