@@ -48,6 +48,7 @@ void threadFunc(int i)
 {    
     //struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
 
+     TRACE() << "thread " << std::this_thread::get_id() << "loop = " << i <<  endl;
 
     // Initialize and start watcher to read client requests
     //ev_io_init(w_client, read_data, STDIN_FILENO, EV_READ);
