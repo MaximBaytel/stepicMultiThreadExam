@@ -215,22 +215,22 @@ void HttpHandler::processingRequest(const HttpRequestHeader& header,const ByteAr
         headerResp.setPharse("Not found");
     }
 
-//    ostringstream out;
+    ostringstream out;
 
-//    out << bodyResp.size();
+    out << bodyResp.size();
 
-//    headerResp.addValue("Content-length",out.str());
+    headerResp.addValue("Content-length",out.str());
 
-    //m_keepAfterResponse = header.value("connection") == "keep-alive" && headerResp.status() == 200;
+    m_keepAfterResponse = header.value("connection") == "keep-alive" && headerResp.status() == 200;
 
     //полагаю что весь мой контент такой..
-    //headerResp.addValue("Content-Type","text/html; charset=UTF-8");
-    headerResp.addValue("Content-Type","text/html");
+    headerResp.addValue("Content-Type","text/html; charset=UTF-8");
+    //headerResp.addValue("Content-Type","text/html");
 
-//    if (m_keepAfterResponse)
-//        headerResp.addValue("Connection","keep-alive");
-//    else
-//        headerResp.addValue("Connection","close");
+    if (m_keepAfterResponse)
+        headerResp.addValue("Connection","keep-alive");
+    else
+        headerResp.addValue("Connection","close");
 
 
 //    //полагаю что весь мой контент такой..
