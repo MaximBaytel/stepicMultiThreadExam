@@ -31,6 +31,8 @@ int HttpHandler::getRequest(int socket,HttpRequestHeader& header)
     if (0 > socket)
         return -1;
 
+    TRACE() << "socket=" << socket << endl;
+
     //размер оставшегося буффера
     size_t size = m_sizeBuffer-m_pos;
     char* buff = m_buffer + m_pos;
@@ -49,7 +51,7 @@ int HttpHandler::getRequest(int socket,HttpRequestHeader& header)
     //errors
     if (0 > res)
     {
-        TRACE() << errno;
+        TRACE() << "recv error=" << errno << endl;
         return -1;
     }
 
