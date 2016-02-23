@@ -247,7 +247,7 @@ void sockPreparing(int& sock,int port,const char* ip)
         exit(EXIT_FAILURE);
     }
 
-    if (listen(sock, 500))
+    if (listen(sock, 128))
     {
         TRACE() << "Error " << errno << endl;
         exit(EXIT_FAILURE);
