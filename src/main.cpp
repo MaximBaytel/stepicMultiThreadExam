@@ -138,7 +138,7 @@ void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
         needStartThread=true;
     }
 
-    TRACE() << "ACCEPT!!!! 3" << endl;
+    TRACE() << "ACCEPT!!!! 3 threadForConnect =" << threadForConnect  << endl;
 
     // Initialize and start watcher to read client requests
     ev_io_init(w_client, read_data, client_sd, EV_READ);
