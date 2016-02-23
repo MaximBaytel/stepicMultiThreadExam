@@ -44,7 +44,13 @@ std::ofstream out;
 
 
 void threadFunc(int i)
-{
+{    
+    struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+
+
+    // Initialize and start watcher to read client requests
+    ev_io_init(w_client, read_data, STDIN_FILENO, EV_READ);
+    ev_io_start(loops[i], w_client);
     ev_loop(loops[i], 0);
     TRACE() << "after " << i << endl;
 }
