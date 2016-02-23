@@ -52,7 +52,8 @@ void threadFunc(int i)
     // Initialize and start watcher to read client requests
     //ev_io_init(w_client, read_data, STDIN_FILENO, EV_READ);
     //ev_io_start(loops[i], w_client);
-    ev_loop(loops[i], 0);
+    while(1)
+    	ev_loop(loops[i], 0);
     TRACE() << "after " << i << endl;
 }
 
@@ -92,7 +93,7 @@ void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
         shutdown(watcher->fd,SHUT_RDWR);
         close(watcher->fd);
-       // ev_io_stop(loop,watcher);
+        ev_io_stop(loop,watcher);
 
     }
 }
