@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
 
 //without daemon is more convience for debugging
 #ifdef __DAEMON__
-    daemonize();
+    //daemonize();
     out.open("/tmp/log.txt");
 #endif
 
