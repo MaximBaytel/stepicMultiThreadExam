@@ -343,6 +343,11 @@ bool HttpHandler::parseRequestLine(const std::string &str, HttpRequestHeader &he
         return false;
     }
 
+    int temp = str.find('?',old_ind);
+
+    if (temp != string::npos)
+	ind = temp;
+
     header.setPath(str.substr(old_ind,ind-old_ind));
 
     ind++;
