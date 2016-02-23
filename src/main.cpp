@@ -102,12 +102,15 @@ void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents)
 /* Accept client requests */
 void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
+    TRACE() << "ACCEPT!!!! 1" << endl; 
     static int threadForConnect=0;
 
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     int client_sd;
     struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+    TRACE() << "ACCEPT!!!! 2" << endl;
+
 
     if(EV_ERROR & revents)
     {
@@ -134,6 +137,8 @@ void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
         loops[threadForConnect] = ev_loop_new(EVBACKEND_EPOLL);
         needStartThread=true;
     }
+
+    TRACE() << "ACCEPT!!!! 3" << endl;
 
     // Initialize and start watcher to read client requests
     ev_io_init(w_client, read_data, client_sd, EV_READ);
