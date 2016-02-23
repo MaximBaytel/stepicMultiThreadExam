@@ -30,7 +30,7 @@ thread_local map<int,HttpHandler*> m_serverMap;
 const char* dir=NULL;
 
 //for simplicity don't get from OS real number of cores
-static const int numberKernel=4;
+static const int numberKernel=2;
 
 //one loop per one work thread
 static struct ev_loop* loops[numberKernel];
