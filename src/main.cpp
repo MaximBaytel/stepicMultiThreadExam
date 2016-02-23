@@ -42,6 +42,7 @@ struct ev_loop* main_loop=NULL;
 
 std::ofstream out;
 
+extern void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents);
 
 void threadFunc(int i)
 {    
