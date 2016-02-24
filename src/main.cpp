@@ -13,6 +13,7 @@
 #include <cstring>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 
 
@@ -33,7 +34,10 @@ const char* dir=NULL;
 //static const int numberKernel=2;
 
 //one loop per one work thread
-//static struct ev_loop* loops[numberKernel];
+
+static struct ev_loop* loops[numberKernel];
+std::mutex mutexes[numberKernel];
+
 
 //for manage work thread
 vector<thread> threads;
@@ -50,6 +54,11 @@ std::ofstream out;
 //    //TRACE() << "idle!"  << endl;
 //}
 
+struct my_io
+{
+    struct ev_io *watcher;
+    int i;
+};
 
 //void threadFunc(int i)
 //{
@@ -57,8 +66,12 @@ std::ofstream out;
 
 //    TRACE() << "thread " << std::this_thread::get_id() << "loop = " << i <<  endl;
 
+<<<<<<< HEAD
 //    ev_idle idle; // actual processing watcher
 //    ev_io io;     // actual event watcher
+=======
+    ev_idle idle; // actual processing watcher    
+>>>>>>> 2bd0186e3b14fddf4e53f2ba9b0c8bc585830b2f
 
 //    // initialisation
 //    ev_idle_init (&idle, idle_cb);
@@ -75,10 +88,18 @@ std::ofstream out;
 //}
 
 
+<<<<<<< HEAD
 ///* Accept client requests */
 //void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents)
 //{
 //    TRACE() << "thread " << std::this_thread::get_id() << endl;
+=======
+/* Accept client requests */
+void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents)
+{
+    std::lock_guard<std::mutex> guard(mutexes[((my_io*)watcher)->i]);
+    TRACE() << "thread " << std::this_thread::get_id() << endl;
+>>>>>>> 2bd0186e3b14fddf4e53f2ba9b0c8bc585830b2f
 
 //    if(EV_ERROR & revents)
 //    {
@@ -135,7 +156,8 @@ void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     int client_sd;
-    struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+    struct my_io *w_client = (struct my_io*) malloc (sizeof(struct ev_io));
+    w_client->i = threadForConnect;
     TRACE() << "ACCEPT!!!! 2" << endl;
 
 
@@ -167,9 +189,17 @@ void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
 //    TRACE() << "ACCEPT!!!! 3 threadForConnect =" << threadForConnect  << endl;
 
+<<<<<<< HEAD
 //    // Initialize and start watcher to read client requests
 //    ev_io_init(w_client, read_data, client_sd, EV_READ);
 //    ev_io_start(loops[threadForConnect], w_client);
+=======
+    std::lock_guard<std::mutex> guard(mutexes[threadForConnect]);
+
+    // Initialize and start watcher to read client requests
+    ev_io_init((struct ev_io*)(w_client), read_data, client_sd, EV_READ);
+    ev_io_start(loops[threadForConnect],(struct ev_io*)(w_client));
+>>>>>>> 2bd0186e3b14fddf4e53f2ba9b0c8bc585830b2f
 
 //    if (needStartThread)
 //    {
