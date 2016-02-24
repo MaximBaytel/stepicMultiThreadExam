@@ -44,17 +44,33 @@ std::ofstream out;
 
 extern void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents);
 
+
+static void idle_cb (EV_P_ ev_idle *w, int revents)
+{
+    //TRACE() << "idle!"  << endl;
+}
+
+
 void threadFunc(int i)
 {    
-    //struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
 
-     TRACE() << "thread " << std::this_thread::get_id() << "loop = " << i <<  endl;
 
-    // Initialize and start watcher to read client requests
-    //ev_io_init(w_client, read_data, STDIN_FILENO, EV_READ);
-    //ev_io_start(loops[i], w_client);
+    TRACE() << "thread " << std::this_thread::get_id() << "loop = " << i <<  endl;
+
+    ev_idle idle; // actual processing watcher
+    ev_io io;     // actual event watcher
+
+    // initialisation
+    ev_idle_init (&idle, idle_cb);
+    ev_idle_start (loops[i],&idle);
+
+
     while(1)
-    	ev_loop(loops[i], 0);
+    {
+        ev_loop(loops[i], 0);
+        TRACE() << "restart loop i =" << i << endl;
+    }
+
     TRACE() << "after " << i << endl;
 }
 
@@ -103,7 +119,7 @@ void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents)
 /* Accept client requests */
 void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
 {
-    TRACE() << "ACCEPT!!!! 1" << endl; 
+    TRACE() << "ACCEPT!!!! 1" << endl;
     static int threadForConnect=0;
 
     struct sockaddr_in client_addr;
@@ -287,7 +303,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-//without daemon is more convience for debugging
+    //without daemon is more convience for debugging
 #ifdef __DAEMON__
     daemonize();
     out.open("/tmp/log.txt");
