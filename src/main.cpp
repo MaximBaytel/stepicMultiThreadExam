@@ -27,11 +27,13 @@ using namespace std;
 
 //handlers by socket and own for each thread
 thread_local map<int,HttpHandler*> m_serverMap;
+thread_local int threadIndex;
 
 const char* dir=NULL;
 
 //for simplicity don't get from OS real number of cores
-static const int numberKernel=2;
+static const int numberKernel=4;
+
 
 //one loop per one work thread
 static struct ev_loop* loops[numberKernel];
@@ -47,10 +49,6 @@ std::ofstream out;
 extern void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents);
 
 
-static void idle_cb (EV_P_ ev_idle *w, int revents)
-{
-    //TRACE() << "idle!"  << endl;
-}
 
 struct my_io
 {
@@ -58,33 +56,44 @@ struct my_io
     int i;
 };
 
+void cb_async(struct ev_loop* loop, ev_async* async, int num)
+{
+
+}
+
+void release(struct ev_loop *loop)
+{
+    mutexes[threadIndex].unlock();
+}
+
+void acquire(struct ev_loop *loop)
+{
+    mutexes[threadIndex].lock();
+}
+
+
 void threadFunc(int i)
 {    
 
-
     TRACE() << "thread " << std::this_thread::get_id() << "loop = " << i <<  endl;
 
-    ev_idle idle; // actual processing watcher    
+    ev_async asynk_watcher;
+    ev_async_init(&asynk_watcher,cb_async);
+    ev_async_start(loops[i],&asynk_watcher);
 
-    // initialisation
-    ev_idle_init (&idle, idle_cb);
-    ev_idle_start (loops[i],&idle);
+    ev_set_loop_release_cb (loops[i],release,acquire);
 
+    threadIndex = i;
 
-    while(1)
-    {
-        ev_loop(loops[i], 0);
-        TRACE() << "restart loop i =" << i << endl;
-    }
+    ev_loop(loops[i], 0);
 
-    TRACE() << "after " << i << endl;
+    TRACE() << "after loop" << i << endl;
 }
 
 
 /* Accept client requests */
 void read_data(struct ev_loop *loop, struct ev_io *watcher, int revents)
-{
-    std::lock_guard<std::mutex> guard(mutexes[((my_io*)watcher)->i]);
+{    
     TRACE() << "thread " << std::this_thread::get_id() << endl;
 
     if(EV_ERROR & revents)
@@ -132,8 +141,7 @@ void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
     struct sockaddr_in client_addr;
     socklen_t client_len = sizeof(client_addr);
     int client_sd;
-    struct my_io *w_client = (struct my_io*) malloc (sizeof(struct ev_io));
-    w_client->i = threadForConnect;
+    struct ev_io *w_client = (struct ev_io *)malloc (sizeof(struct ev_io));
     TRACE() << "ACCEPT!!!! 2" << endl;
 
 
@@ -154,31 +162,35 @@ void accept_connection(struct ev_loop *loop, struct ev_io *watcher, int revents)
 
     TRACE() << "Successfully connected with client.\n";
 
-    bool needStartThread=false;
 
-    //loop yet doesn't exist
-    if (!loops[threadForConnect])
-    {
-        loops[threadForConnect] = ev_loop_new(EVBACKEND_EPOLL);
-        needStartThread=true;
-    }
-
-    TRACE() << "ACCEPT!!!! 3 threadForConnect =" << threadForConnect  << endl;
-
-    std::lock_guard<std::mutex> guard(mutexes[threadForConnect]);
+    mutexes[threadForConnect].lock();
 
     // Initialize and start watcher to read client requests
     ev_io_init((struct ev_io*)(w_client), read_data, client_sd, EV_READ);
     ev_io_start(loops[threadForConnect],(struct ev_io*)(w_client));
 
-    if (needStartThread)
-    {
-        //create and start thread only after register watcher because without watcher even loop will finished
-        threads.push_back(thread(threadFunc,threadForConnect));
-    }
+    mutexes[threadForConnect].unlock();
+
+    ev_async async;
+
+    ev_async_send(loops[threadForConnect],&async);
+
 
     //next incoming request by handling next thread in ring
     threadForConnect = (threadForConnect + 1) % numberKernel;
+}
+
+void prepareWorkers()
+{
+    int i =0;
+
+    while (i < numberKernel)
+    {
+        loops[i] = ev_loop_new(EVBACKEND_EPOLL);
+        threads.push_back(thread(threadFunc,i));
+        i++;
+
+    }
 }
 
 //for gracefully quit
@@ -192,6 +204,9 @@ void final_handler(int signum)
         if (loops[i])
         {
             ev_break(loops[i]);
+            ev_async async;
+
+            ev_async_send(loops[i],&async);
         }
         i++;
     }
@@ -325,6 +340,8 @@ int main(int argc, char *argv[])
     int sock = 0;
 
     sockPreparing(sock,port,ip);
+
+    prepareWorkers();
 
     main_loop = ev_default_loop(EVBACKEND_EPOLL);
 
